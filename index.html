@@ -112,6 +112,7 @@ button, input { font: inherit; color: inherit; }
 .evening { margin-top: 14px; padding: 14px 16px; background: var(--card-bg); color: var(--card-fg); border: 1px solid var(--line); border-radius: 2px; display: grid; grid-template-columns: 1fr 104px; gap: 12px; align-items: center; }
 .eimg { display: block; width: 104px; height: 104px; object-fit: cover; object-position: 50% 18%; border-radius: 2px; }
 .evening .lab { color: #a9a8a3; }
+.evening .bonus { display: block; margin-top: 10px; font-family: var(--f-mono); font-size: 12px; line-height: 1.3; letter-spacing: .06em; text-transform: uppercase; color: #62aad6; }
 .evening .name { display: block; margin-top: 4px; font-family: var(--f-disp); font-weight: 400; font-size: 52px; line-height: .95; letter-spacing: .01em; }
 .book { margin-top: 14px; display: grid; gap: 12px; }
 .field .lab { margin-bottom: 6px; }
@@ -127,6 +128,7 @@ button, input { font: inherit; color: inherit; }
 .ticket .head { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-bottom: 1px dashed var(--ink); }
 .ticket .body { padding: 14px; display: grid; gap: 10px; }
 .ticket .row { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+.ticket .row span:last-child { text-align: right; }
 .ticket .row .lab { align-self: center; }
 .ticket .code { font-family: var(--f-mono); font-weight: 500; font-size: 28px; letter-spacing: .08em; }
 .ticket .perk { margin: 0; padding: 12px 14px; border-top: 1px dashed var(--ink); font-size: 14px; }
@@ -147,7 +149,7 @@ button, input { font: inherit; color: inherit; }
   <div class="bottom">
     <p class="rules">КЬЮ — listening bar: сюда приходят слушать музыку в тёплом свете, а разговоры тише музыки. Но кто-то из посетителей всё равно кашляет, шуршит или звонит. Тапай по шуму, пока кольцо не закрылось. Три скачка иглы, и тебя попросят на выход.</p>
     <button class="btn" id="go" type="button">Слушать</button>
-    <p class="fine">Концепт-игра к учебному проекту бара КЬЮ. Бронь и коктейль условные. Музыка: «Hope», Rusted Music Studio, CC BY-SA 4.0.</p>
+    <p class="fine">Концепт-игра к учебному проекту бара КЬЮ. Бронь и бонусы условные. Музыка: «Hope», Rusted Music Studio, CC BY-SA 4.0.</p>
   </div>
 </section>
 
@@ -171,7 +173,7 @@ button, input { font: inherit; color: inherit; }
     <li><span class="lab">Скачков</span><span class="big" id="rk">0</span></li>
     <li><span class="lab">Продержался</span><span class="big" id="rt2">0с</span></li>
   </ul>
-  <div class="evening"><div><span class="lab">Твой вечер в КЬЮ</span><span class="name" id="ev">Тишина</span></div><img class="eimg" id="eimg" src="quiet.webp" alt="" width="104" height="104"></div>
+  <div class="evening"><div><span class="lab">Твой вечер в КЬЮ</span><span class="name" id="ev">Тишина</span><span class="bonus" id="evb"></span></div><img class="eimg" id="eimg" src="quiet.webp" alt="" width="104" height="104"></div>
   <form class="book" id="book" novalidate>
     <div class="field"><label class="lab" for="nm">Имя для брони</label><input id="nm" type="text" autocomplete="given-name" placeholder="Как записать"></div>
     <div class="field"><span class="lab" id="dl">Когда придёшь</span>
@@ -190,6 +192,7 @@ button, input { font: inherit; color: inherit; }
       <div class="row"><span class="lab">Гость</span><span id="tn"></span></div>
       <div class="row"><span class="lab">Вечер</span><span id="te"></span></div>
       <div class="row"><span class="lab">День</span><span id="td"></span></div>
+      <div class="row"><span class="lab">Бонус</span><span id="tb"></span></div>
       <div class="row"><span class="lab">Место</span><span>за стойкой, у вертушки</span></div>
       <div class="code" id="tc">КЬЮ-0000</div>
     </div>
@@ -214,10 +217,10 @@ var NOISES = [
   { l: "Чат",               q: "Кто-то отвечает на рабочий чат вслух." }
 ];
 var LEVELS = [
-  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Игла скакала так, что бармен вышел сам.", ev: "Бетон", img: "poster-1.webp" },
-  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Часть шума ты остановил. Остальное услышал весь бар.", ev: "Волна", img: "poster-2.webp" },
-  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "Бар выдохнул. Можно слушать дальше.", ev: "Глубина", img: "poster-3.webp" },
-  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "В зале тишина. Бармен перестал протирать бокалы.", ev: "Тишина", img: "quiet.webp" }
+  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Игла скакала так, что бармен вышел сам.", ev: "Бетон", img: "poster-1.webp", bonus: "скидка 5%", perk: "Покажи экран бармену: скидка 5% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Часть шума ты остановил. Остальное услышал весь бар.", ev: "Волна", img: "poster-2.webp", bonus: "скидка 10%", perk: "Покажи экран бармену: скидка 10% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "Бар выдохнул. Можно слушать дальше.", ev: "Глубина", img: "poster-3.webp", bonus: "скидка 15%", perk: "Покажи экран бармену: скидка 15% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "В зале тишина. Бармен перестал протирать бокалы.", ev: "Тишина", img: "quiet.webp", bonus: "коктейль «Игла» бесплатно", perk: "Покажи экран бармену: первый коктейль «Игла» за счёт заведения. Это концепт: бронь и бонус условные." }
 ];
 
 function $(s) { return document.querySelector(s); }
@@ -358,7 +361,7 @@ function finishGame(ok) { S.over = true; S.done = ok; on.end(ok); }
 function levelOf(n, ok) { var l = 0; for (var i = 0; i < LEVELS.length; i++) if (n >= LEVELS[i].min) l = i; if (l === 3 && !ok) l = 2; return l; }
 
 /* ---------- ui ---------- */
-var el = {}, cv, cx, cw = 0, chh = 0, dpr = 1, raf = 0, lastTs = 0, ang = 0, skipFx = 0, quipT = 0, running = false;
+var curLevel = null, el = {}, cv, cx, cw = 0, chh = 0, dpr = 1, raf = 0, lastTs = 0, ang = 0, skipFx = 0, quipT = 0, running = false;
 function show(id) { ["start", "game", "result"].forEach(function (s) { $("#" + s).hidden = s !== id; }); }
 function setSnd(v) { Snd.setOn(v); [].forEach.call(document.querySelectorAll(".snd:not(.theme)"), function (b) { b.setAttribute("aria-pressed", v ? "true" : "false"); }); }
 function say(text, warn) { el.quip.textContent = nb(text); el.quip.classList.toggle("warn", !!warn); quipT = 3.5; }
@@ -462,7 +465,7 @@ function showResult() {
   $("#rt").innerHTML = L.lines.map(function (w) { return "<span class=\"w\">" + w + "</span>"; }).join("");
   $("#rl").textContent = nb(L.line);
   $("#rs").textContent = S.shushed; $("#rk").textContent = S.skips; $("#rt2").textContent = Math.round(Math.min(S.t, DUR)) + "с";
-  $("#ev").textContent = L.ev; $("#eimg").src = L.img;
+  $("#ev").textContent = L.ev; $("#eimg").src = L.img; $("#evb").textContent = L.bonus; curLevel = L; $(".perk").textContent = nb(L.perk);
   $("#book").hidden = false; $("#ticket").hidden = true; $("#saveWrap").hidden = true; $("#err").textContent = "";
   show("result"); $("#result").scrollTop = 0; fitAll();
 }
@@ -509,14 +512,14 @@ function buildTicketPng() {
     c.fillStyle = ink; var fs = 300; c.font = fs + 'px Serpantin, Oswald, Impact, sans-serif';
     while (c.measureText(name).width > W - 2 * M && fs > 80) { fs -= 8; c.font = fs + 'px Serpantin, Oswald, Impact, sans-serif'; }
     c.fillText(name, M, 330 + fs * 0.92);
-    var py = 330 + fs * 0.92 + 50, ps = 600;
+    var py = 330 + fs * 0.92 + 50, ps = 540;
     if (pic) {
       var iw = pic.width, ih = pic.height, sw = Math.min(iw, ih), sy = ih > iw ? (ih - iw) * 0.18 : 0, sx = iw > ih ? (iw - ih) / 2 : 0;
       c.drawImage(pic, sx, sy, sw, sw, (W - ps) / 2, py, ps, ps);
     }
     var y = py + ps + 70;
     c.strokeStyle = ink; c.lineWidth = 3; c.setLineDash([14, 12]); c.beginPath(); c.moveTo(M, y - 40); c.lineTo(W - M, y - 40); c.stroke(); c.setLineDash([]);
-    var rows = [["ГОСТЬ", $("#tn").textContent], ["ДЕНЬ", $("#td").textContent], ["МЕСТО", "за стойкой, у вертушки"]];
+    var rows = [["ГОСТЬ", $("#tn").textContent], ["ДЕНЬ", $("#td").textContent], ["БОНУС", $("#tb").textContent], ["МЕСТО", "за стойкой, у вертушки"]];
     rows.forEach(function (rw) {
       c.fillStyle = mute; c.font = '500 30px "IBM Plex Mono", ui-monospace, Menlo, monospace'; c.textAlign = "left"; c.fillText(rw[0], M, y);
       c.fillStyle = ink; c.font = '500 42px "IBM Plex Sans", Helvetica, Arial, sans-serif'; c.textAlign = "right";
@@ -562,7 +565,7 @@ function boot() {
     var nm = $("#nm").value.trim();
     if (nm.length < 2) { $("#err").textContent = "Напиши имя, чтобы бармен знал, кого ждать."; $("#nm").focus(); return; }
     var day = document.querySelector("input[name=day]:checked").value;
-    $("#tn").textContent = nm; $("#te").textContent = "«" + $("#ev").textContent + "»"; $("#td").textContent = day;
+    $("#tn").textContent = nm; $("#te").textContent = "«" + $("#ev").textContent + "»"; $("#td").textContent = day; $("#tb").textContent = curLevel ? curLevel.bonus : "";
     $("#tc").textContent = "КЬЮ-" + ("000" + ((Math.random() * 9000 + 1000) | 0)).slice(-4);
     $("#book").hidden = true; $("#ticket").hidden = false; $("#saveWrap").hidden = false; $("#ticket").scrollIntoView({ block: "nearest" });
   });

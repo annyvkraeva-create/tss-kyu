@@ -195,6 +195,7 @@ button, input { font: inherit; color: inherit; }
     </div>
     <p class="perk">Покажи экран бармену: первый коктейль «Игла» за счёт заведения. Это концепт: бронь никуда не уходит.</p>
   </div>
+  <div class="book" id="saveWrap" hidden><button class="btn line" id="save" type="button">Сохранить билет</button></div>
   <div class="book"><button class="link" id="again" type="button">Сыграть ещё раз</button></div>
 </section>
 
@@ -462,7 +463,7 @@ function showResult() {
   $("#rl").textContent = nb(L.line);
   $("#rs").textContent = S.shushed; $("#rk").textContent = S.skips; $("#rt2").textContent = Math.round(Math.min(S.t, DUR)) + "с";
   $("#ev").textContent = L.ev; $("#eimg").src = L.img;
-  $("#book").hidden = false; $("#ticket").hidden = true; $("#err").textContent = "";
+  $("#book").hidden = false; $("#ticket").hidden = true; $("#saveWrap").hidden = true; $("#err").textContent = "";
   show("result"); $("#result").scrollTop = 0; fitAll();
 }
 
@@ -477,6 +478,69 @@ function applyTheme(dark) {
   var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#0B0B0D" : "#EFEEEA");
 }
 function isDark() { return document.documentElement.getAttribute("data-look") === "dark"; }
+
+
+/* ---------- save ticket as image ---------- */
+function wrapText(c, text, x, y, maxW, lh) {
+  var words = text.split(" "), line = "", yy = y;
+  for (var i = 0; i < words.length; i++) {
+    var t = line ? line + " " + words[i] : words[i];
+    if (c.measureText(t).width > maxW && line) { c.fillText(line, x, yy); line = words[i]; yy += lh; } else line = t;
+  }
+  if (line) { c.fillText(line, x, yy); yy += lh; }
+  return yy;
+}
+function loadImg(src) { return new Promise(function (res) { var i = new Image(); i.onload = function () { res(i); }; i.onerror = function () { res(null); }; i.src = src; }); }
+function buildTicketPng() {
+  var cs = getComputedStyle(document.documentElement), V = function (n) { return cs.getPropertyValue(n).trim(); };
+  var bg = V("--bg"), ink = V("--ink"), mute = V("--mute"), blue = V("--blue"), line = V("--line");
+  var W = 1080, H = 1920, M = 80;
+  var cvs = document.createElement("canvas"); cvs.width = W; cvs.height = H; var c = cvs.getContext("2d");
+  var loads = [loadImg(document.querySelector("#ticket .logo").src), loadImg($("#eimg").src)];
+  if (document.fonts && document.fonts.load) loads.push(document.fonts.load('200px Serpantin'), document.fonts.load('500px "IBM Plex Mono"'));
+  return Promise.all(loads).then(function (r) {
+    var logo = r[0], pic = r[1];
+    c.fillStyle = bg; c.fillRect(0, 0, W, H);
+    if (logo) { var lh = 150, lw = lh * logo.width / logo.height; c.drawImage(logo, M, 70, lw, lh); }
+    c.fillStyle = mute; c.font = '500 30px "IBM Plex Mono", ui-monospace, Menlo, monospace'; c.textBaseline = "alphabetic";
+    c.textAlign = "right"; c.fillText("ПОКРОВКА 12", W - M, 150); c.textAlign = "left";
+    c.fillText("ТВОЙ ВЕЧЕР В КЬЮ", M, 330);
+    var name = $("#ev").textContent.toUpperCase();
+    c.fillStyle = ink; var fs = 300; c.font = fs + 'px Serpantin, Oswald, Impact, sans-serif';
+    while (c.measureText(name).width > W - 2 * M && fs > 80) { fs -= 8; c.font = fs + 'px Serpantin, Oswald, Impact, sans-serif'; }
+    c.fillText(name, M, 330 + fs * 0.92);
+    var py = 330 + fs * 0.92 + 50, ps = 600;
+    if (pic) {
+      var iw = pic.width, ih = pic.height, sw = Math.min(iw, ih), sy = ih > iw ? (ih - iw) * 0.18 : 0, sx = iw > ih ? (iw - ih) / 2 : 0;
+      c.drawImage(pic, sx, sy, sw, sw, (W - ps) / 2, py, ps, ps);
+    }
+    var y = py + ps + 70;
+    c.strokeStyle = ink; c.lineWidth = 3; c.setLineDash([14, 12]); c.beginPath(); c.moveTo(M, y - 40); c.lineTo(W - M, y - 40); c.stroke(); c.setLineDash([]);
+    var rows = [["ГОСТЬ", $("#tn").textContent], ["ДЕНЬ", $("#td").textContent], ["МЕСТО", "за стойкой, у вертушки"]];
+    rows.forEach(function (rw) {
+      c.fillStyle = mute; c.font = '500 30px "IBM Plex Mono", ui-monospace, Menlo, monospace'; c.textAlign = "left"; c.fillText(rw[0], M, y);
+      c.fillStyle = ink; c.font = '500 42px "IBM Plex Sans", Helvetica, Arial, sans-serif'; c.textAlign = "right";
+      var v = rw[1]; while (c.measureText(v).width > 640 && v.length > 3) v = v.slice(0, -2); c.fillText(v === rw[1] ? v : v + "…", W - M, y + 2); y += 84;
+    });
+    c.textAlign = "left"; c.fillStyle = blue; c.font = '500 120px "IBM Plex Mono", ui-monospace, Menlo, monospace'; c.fillText($("#tc").textContent, M, y + 80);
+    c.fillStyle = ink; c.font = '400 34px "IBM Plex Sans", Helvetica, Arial, sans-serif';
+    wrapText(c, $(".perk").textContent.trim(), M, y + 160, W - 2 * M, 48);
+    return new Promise(function (res) { cvs.toBlob(function (b) { res(b); }, "image/png"); });
+  });
+}
+function saveTicket() {
+  var btn = $("#save"), old = btn.textContent; btn.disabled = true; btn.textContent = "Готовлю…";
+  buildTicketPng().then(function (blob) {
+    if (!blob) throw new Error("no blob");
+    var file; try { file = new File([blob], "kyu-bilet.png", { type: "image/png" }); } catch (e) { file = null; }
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+      return navigator.share({ files: [file], title: "Билет в КЬЮ" }).catch(function (e) { if (e && e.name === "AbortError") return; throw e; });
+    }
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "kyu-bilet.png"; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }).catch(function () { btn.textContent = "Не вышло, сделай скриншот"; setTimeout(function () { btn.textContent = old; }, 2500); return "err"; })
+    .then(function (r) { btn.disabled = false; if (r !== "err") btn.textContent = old; });
+}
 
 function boot() {
   el.room = $("#room"); el.chips = $("#chips"); el.cnt = $("#cnt"); el.pips = $("#pips"); el.fill = $("#fill"); el.left = $("#left"); el.quip = $("#quip");
@@ -500,8 +564,9 @@ function boot() {
     var day = document.querySelector("input[name=day]:checked").value;
     $("#tn").textContent = nm; $("#te").textContent = "«" + $("#ev").textContent + "»"; $("#td").textContent = day;
     $("#tc").textContent = "КЬЮ-" + ("000" + ((Math.random() * 9000 + 1000) | 0)).slice(-4);
-    $("#book").hidden = true; $("#ticket").hidden = false; $("#ticket").scrollIntoView({ block: "nearest" });
+    $("#book").hidden = true; $("#ticket").hidden = false; $("#saveWrap").hidden = false; $("#ticket").scrollIntoView({ block: "nearest" });
   });
+  $("#save").addEventListener("click", saveTicket);
   Snd.preload();
   raf = requestAnimationFrame(frame);
 }

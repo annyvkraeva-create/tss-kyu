@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-@font-face { font-family: "Serpantin"; src: url("fonts/serpantin.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Serpantin"; src: url("serpantin.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
 /* Layout: a turntable seen from above on a warm paper page. Technical, quiet, Rams-like; black chips are the only loud thing. */
 :root {
   --bg: #EFEEEA;
@@ -43,7 +43,7 @@ button, input { font: inherit; color: inherit; }
 .app { position: relative; height: 100%; max-width: 520px; margin: 0 auto; }
 .screen { position: absolute; inset: 0; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-block: 8px 16px; }
 
-.top { display: flex; align-items: center; justify-content: flex-start; gap: 8px; min-height: 44px; flex: none; }
+.top { position: relative; z-index: 5; display: flex; align-items: center; justify-content: flex-start; gap: 8px; min-height: 44px; flex: none; }
 .mark { font-weight: 600; font-size: 20px; letter-spacing: .02em; }
 .logo { display: block; height: 42px; width: auto; }
 .addr { font-family: var(--f-mono); font-size: 12px; color: var(--mute); letter-spacing: .04em; }
@@ -54,11 +54,12 @@ button, input { font: inherit; color: inherit; }
 .snd:focus-visible, .btn:focus-visible, .chip:focus-visible, input:focus-visible, .day:focus-within, .link:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
 
 /* start */
-.hero { position: relative; flex: 1; min-height: 340px; }
-.title { position: relative; z-index: 2; margin: 10px 0 0; font-family: var(--f-disp); font-weight: 400; font-size: 200px; line-height: .86; letter-spacing: .005em; }
+.hero { position: relative; flex: 1; min-height: 300px; display: flex; flex-direction: column; }
+.title { position: relative; z-index: 2; flex: none; margin: 6px 0 0; font-family: var(--f-disp); font-weight: 400; font-size: 200px; line-height: .86; letter-spacing: .005em; }
+.title { pointer-events: none; }
 .title .w { display: block; width: max-content; white-space: nowrap; }
 .title .dot { color: var(--blue); }
-.art { position: absolute; z-index: 1; right: 0; bottom: 0; width: min(88%, 380px); height: auto; aspect-ratio: 1; animation: breathe 5s ease-in-out infinite; }
+.art { position: static; align-self: center; flex: 1 1 0; min-height: 0; width: auto; max-width: min(92%, 380px); height: auto; margin-top: 8px; object-fit: contain; animation: breathe 5s ease-in-out infinite; }
 .disc-old { position: absolute; z-index: 1; right: -8%; bottom: 4px; width: min(86%, 380px); aspect-ratio: 1; border-radius: 50%;
   background:
     radial-gradient(circle, var(--bg) 0 1.6%, transparent 1.9%),
@@ -131,17 +132,17 @@ button, input { font: inherit; color: inherit; }
 .ticket .perk { margin: 0; padding: 12px 14px; border-top: 1px dashed var(--ink); font-size: 14px; }
 .link { background: none; border: 0; padding: 12px 0; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; font-size: 15px; justify-self: center; }
 
-@media (max-height: 700px) { .big { font-size: 34px; } .room { min-height: 200px; } .title { font-size: 150px; } }
+@media (max-height: 700px) { .big { font-size: 34px; } .room { min-height: 200px; } .title { font-size: 110px; } }
 @media (prefers-reduced-motion: reduce) { .art { animation: none; } .chip { animation: none; } }
 </style></head><body>
 
 <main class="app">
 
 <section class="screen" id="start" aria-labelledby="h1">
-  <div class="top"><img class="logo" src="img/logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd1" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
+  <div class="top"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd1" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
   <div class="hero">
     <h1 class="title" id="h1"><span class="w">Тсс<span class="dot">.</span></span></h1>
-    <img class="art" src="img/hero.webp" alt="Низкополигональная фигура слушателя с проигрывателем на синем круге" width="700" height="700">
+    <img class="art" src="hero.webp" alt="Низкополигональная фигура слушателя с проигрывателем на синем круге" width="700" height="700">
   </div>
   <div class="bottom">
     <p class="rules">КЬЮ — listening bar: сюда приходят слушать музыку в тёплом свете, а разговоры тише музыки. Но кто-то из посетителей всё равно кашляет, шуршит или звонит. Тапай по шуму, пока кольцо не закрылось. Три скачка иглы, и тебя попросят на выход.</p>
@@ -151,7 +152,7 @@ button, input { font: inherit; color: inherit; }
 </section>
 
 <section class="screen" id="game" hidden aria-label="Игра">
-  <div class="top"><img class="logo" src="img/logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd2" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
+  <div class="top"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd2" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
   <div class="hud">
     <div><span class="lab">Заглушено</span><span class="big" id="cnt">0</span></div>
     <div><span class="lab">Игла</span><div class="pips" id="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div></div>
@@ -162,7 +163,7 @@ button, input { font: inherit; color: inherit; }
 </section>
 
 <section class="screen" id="result" hidden aria-labelledby="rt">
-  <div class="top"><img class="logo" src="img/logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd3" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
+  <div class="top"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd3" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
   <h2 class="rtitle" id="rt"></h2>
   <p class="rline" id="rl"></p>
   <ul class="stats">
@@ -170,7 +171,7 @@ button, input { font: inherit; color: inherit; }
     <li><span class="lab">Скачков</span><span class="big" id="rk">0</span></li>
     <li><span class="lab">Продержался</span><span class="big" id="rt2">0с</span></li>
   </ul>
-  <div class="evening"><div><span class="lab">Твой вечер в КЬЮ</span><span class="name" id="ev">Тишина</span></div><img class="eimg" id="eimg" src="img/quiet.webp" alt="" width="104" height="104"></div>
+  <div class="evening"><div><span class="lab">Твой вечер в КЬЮ</span><span class="name" id="ev">Тишина</span></div><img class="eimg" id="eimg" src="quiet.webp" alt="" width="104" height="104"></div>
   <form class="book" id="book" novalidate>
     <div class="field"><label class="lab" for="nm">Имя для брони</label><input id="nm" type="text" autocomplete="given-name" placeholder="Как записать"></div>
     <div class="field"><span class="lab" id="dl">Когда придёшь</span>
@@ -184,7 +185,7 @@ button, input { font: inherit; color: inherit; }
     <button class="btn" type="submit">Забронировать место</button>
   </form>
   <div class="ticket" id="ticket" hidden>
-    <div class="head"><img class="logo" src="img/logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><span class="lab">Покровка 12</span></div>
+    <div class="head"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><span class="lab">Покровка 12</span></div>
     <div class="body">
       <div class="row"><span class="lab">Гость</span><span id="tn"></span></div>
       <div class="row"><span class="lab">Вечер</span><span id="te"></span></div>
@@ -212,10 +213,10 @@ var NOISES = [
   { l: "Чат",               q: "Кто-то отвечает на рабочий чат вслух." }
 ];
 var LEVELS = [
-  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Игла скакала так, что бармен вышел сам.", ev: "Бетон", img: "img/poster-1.webp" },
-  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Часть шума ты остановил. Остальное услышал весь бар.", ev: "Волна", img: "img/poster-2.webp" },
-  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "Бар выдохнул. Можно слушать дальше.", ev: "Глубина", img: "img/poster-3.webp" },
-  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "В зале тишина. Бармен перестал протирать бокалы.", ev: "Тишина", img: "img/quiet.webp" }
+  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Игла скакала так, что бармен вышел сам.", ev: "Бетон", img: "poster-1.webp" },
+  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Часть шума ты остановил. Остальное услышал весь бар.", ev: "Волна", img: "poster-2.webp" },
+  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "Бар выдохнул. Можно слушать дальше.", ev: "Глубина", img: "poster-3.webp" },
+  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "В зале тишина. Бармен перестал протирать бокалы.", ev: "Тишина", img: "quiet.webp" }
 ];
 
 function $(s) { return document.querySelector(s); }
@@ -233,7 +234,7 @@ function fit(box, max) {
   [].forEach.call(box.children, function (s) { w = Math.max(w, s.offsetWidth); });
   if (w) box.style.fontSize = Math.min(max, Math.floor(100 * box.clientWidth / w * 0.97)) + "px";
 }
-function fitAll() { fit($("#h1"), 260); fit($("#rt"), 120); }
+function fitAll() { fit($("#h1"), window.innerHeight < 700 ? 100 : 140); fit($("#rt"), 120); }
 function mmss(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2); }
 
 /* ---------- sound ---------- */
@@ -272,7 +273,7 @@ var Snd = {
     this.env(g, t, vol, 0.012); s.connect(f); f.connect(g); g.connect(this.master); s.start(t, Math.random() * 0.8); s.stop(t + 0.03);
   },
   preload: function () {
-    var me = this; try { fetch("audio/hope.mp3").then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (a) { if (a) me.raw = a; }).catch(function () {}); } catch (e) {}
+    var me = this; try { fetch("hope.mp3").then(function (r) { return r.ok ? r.arrayBuffer() : null; }).then(function (a) { if (a) me.raw = a; }).catch(function () {}); } catch (e) {}
   },
   playTrack: function () {
     var c = this.ctx; if (!c || !this.buf || this.src) return;
@@ -358,7 +359,7 @@ function levelOf(n, ok) { var l = 0; for (var i = 0; i < LEVELS.length; i++) if 
 /* ---------- ui ---------- */
 var el = {}, cv, cx, cw = 0, chh = 0, dpr = 1, raf = 0, lastTs = 0, ang = 0, skipFx = 0, quipT = 0, running = false;
 function show(id) { ["start", "game", "result"].forEach(function (s) { $("#" + s).hidden = s !== id; }); }
-function setSnd(v) { Snd.setOn(v); [].forEach.call(document.querySelectorAll(".snd"), function (b) { b.setAttribute("aria-pressed", v ? "true" : "false"); }); }
+function setSnd(v) { Snd.setOn(v); [].forEach.call(document.querySelectorAll(".snd:not(.theme)"), function (b) { b.setAttribute("aria-pressed", v ? "true" : "false"); }); }
 function say(text, warn) { el.quip.textContent = nb(text); el.quip.classList.toggle("warn", !!warn); quipT = 3.5; }
 
 var chipEls = {};
@@ -471,7 +472,7 @@ function applyTheme(dark) {
   TH = dark
     ? { plinth: "#18181b", rim: "#34343a", mute: "#9b9ca1", arm: "#b4b8bd", armBase: "#7d8186", head: "#EFEEEA", label: "#EFEEEA", dot: "#EFEEEA", groove: "rgba(255,255,255,.07)" }
     : { plinth: "#E2E1DB", rim: "#cfcec7", mute: "#5b5e63", arm: "#6d7075", armBase: "#8a8d91", head: "#0B0B0D", label: "#EFEEEA", dot: "#EFEEEA", groove: "rgba(255,255,255,.07)" };
-  [].forEach.call(document.querySelectorAll(".logo"), function (i) { i.setAttribute("src", dark ? "img/logo-white.svg" : "img/logo-blue.svg"); });
+  [].forEach.call(document.querySelectorAll(".logo"), function (i) { i.setAttribute("src", dark ? "logo-white.svg" : "logo-blue.svg"); });
   [].forEach.call(document.querySelectorAll(".theme"), function (b) { b.textContent = dark ? "День" : "Ночь"; b.setAttribute("aria-pressed", dark ? "true" : "false"); });
   var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", dark ? "#0B0B0D" : "#EFEEEA");
 }
@@ -485,7 +486,7 @@ function boot() {
   window.addEventListener("hashchange", function () { applyTheme(location.hash === "#dark"); });
   [].forEach.call(document.querySelectorAll(".theme"), function (b) { b.addEventListener("click", function () { var d = !isDark(); applyTheme(d); try { location.hash = d ? "dark" : "light"; } catch (e) {} }); });
   window.addEventListener("resize", fitAll); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
-  [].forEach.call(document.querySelectorAll(".snd"), function (b) { b.addEventListener("click", function () { setSnd(b.getAttribute("aria-pressed") !== "true"); }); });
+  [].forEach.call(document.querySelectorAll(".snd:not(.theme)"), function (b) { b.addEventListener("click", function () { setSnd(b.getAttribute("aria-pressed") !== "true"); }); });
   function begin() {
     var ok = Snd.init(), p = ok ? Snd.ctx.resume() : null, done = false;
     function go() { if (!done) { done = true; startGame(); } }

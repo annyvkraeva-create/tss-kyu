@@ -208,6 +208,7 @@ button, input { font: inherit; color: inherit; }
 </main>
 
 <script>
+var MINB = 5; // меньше стольких заглушённых шумов скидки нет
 var DUR = 45, MAXSK = 3, MAXC = 6, CHIP_R = 38;
 var NOISES = [
   { l: "Кашель",            q: "Кто-то кашлянул в самом тихом месте." },
@@ -468,8 +469,8 @@ function showResult() {
   $("#rt").innerHTML = L.lines.map(function (w) { return "<span class=\"w\">" + w + "</span>"; }).join("");
   $("#rl").textContent = nb(L.line);
   $("#rs").textContent = S.shushed; $("#rk").textContent = S.skips; $("#rt2").textContent = Math.round(Math.min(S.t, DUR)) + "с";
-  $("#ev").textContent = L.ev; $("#eimg").src = L.img; $("#evb").textContent = L.bonus; curLevel = L; $(".perk").textContent = nb(L.perk);
-  $("#cta").hidden = false; $("#book").hidden = true; $("#ticket").hidden = true; $("#ready").hidden = true; $("#saveWrap").hidden = true; $("#againWrap").hidden = true; $("#err").textContent = "";
+  $("#ev").textContent = L.ev; $("#eimg").src = L.img; var nob = S.shushed < MINB; $("#evb").textContent = nob ? "Скидки нет. Заглуши хотя бы " + MINB + " шумов." : L.bonus; curLevel = nob ? null : L; $(".perk").textContent = nb(L.perk);
+  $("#open").hidden = nob; $("#cta").querySelector(".again").classList.toggle("line", !nob); $("#cta").hidden = false; $("#book").hidden = true; $("#ticket").hidden = true; $("#ready").hidden = true; $("#saveWrap").hidden = true; $("#againWrap").hidden = true; $("#err").textContent = "";
   show("result"); $("#result").scrollTop = 0; fitAll();
 }
 

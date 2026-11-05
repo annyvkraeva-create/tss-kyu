@@ -132,6 +132,7 @@ button, input { font: inherit; color: inherit; }
 .ticket .row .lab { align-self: center; }
 .ticket .code { font-family: var(--f-mono); font-weight: 500; font-size: 28px; letter-spacing: .08em; }
 .ticket .perk { margin: 0; padding: 12px 14px; border-top: 1px dashed var(--ink); font-size: 14px; }
+.ready { margin: 22px 0 0; font-family: var(--f-disp); font-weight: 400; font-size: 40px; line-height: .95; letter-spacing: .01em; }
 .link { background: none; border: 0; padding: 12px 0; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; font-size: 15px; justify-self: center; }
 
 @media (max-height: 700px) { .big { font-size: 34px; } .room { min-height: 200px; } .title { font-size: 110px; } }
@@ -147,9 +148,9 @@ button, input { font: inherit; color: inherit; }
     <img class="art" src="hero.webp" alt="Низкополигональная фигура слушателя с проигрывателем на синем круге" width="700" height="700">
   </div>
   <div class="bottom">
-    <p class="rules">КЬЮ — listening bar: сюда приходят слушать музыку в тёплом свете, а разговоры тише музыки. Но кто-то из посетителей всё равно кашляет, шуршит или звонит. Тапай по шуму, пока кольцо не закрылось. Три скачка иглы, и тебя попросят на выход.</p>
-    <button class="btn" id="go" type="button">Слушать</button>
-    <p class="fine">Концепт-игра к учебному проекту бара КЬЮ. Бронь и бонусы условные. Музыка: «Hope», Rusted Music Studio, CC BY-SA 4.0.</p>
+    <p class="rules">КЬЮ — listening bar: сюда приходят слушать музыку в тёплом свете, а разговоры тише музыки. Но кто-то из посетителей всё равно кашляет, шуршит или звонит. Тапай по шуму, пока кольцо не закрылось.</p>
+    <button class="btn" id="go" type="button">Включить пластинку</button>
+    <p class="fine">Концепт-игра к авторскому проекту бара КЬЮ. Музыка: «Hope», Rusted Music Studio, CC BY-SA 4.0.</p>
   </div>
 </section>
 
@@ -157,7 +158,7 @@ button, input { font: inherit; color: inherit; }
   <div class="top"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><button class="snd theme" type="button" aria-pressed="false">Ночь</button><button class="snd" id="snd2" type="button" aria-pressed="true"><span class="dot"></span>Звук</button></div>
   <div class="hud">
     <div><span class="lab">Заглушено</span><span class="big" id="cnt">0</span></div>
-    <div><span class="lab">Игла</span><div class="pips" id="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div></div>
+    <div><span class="lab">Скачки иглы, максимум 3</span><div class="pips" id="pips"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div></div>
   </div>
   <div class="prog"><span class="lab">0:00</span><div class="track"><div class="fill" id="fill"></div></div><span class="lab" id="left">0:45</span></div>
   <div class="room" id="room"><canvas id="deck" aria-hidden="true"></canvas><div class="chips" id="chips"></div></div>
@@ -174,7 +175,8 @@ button, input { font: inherit; color: inherit; }
     <li><span class="lab">Продержался</span><span class="big" id="rt2">0с</span></li>
   </ul>
   <div class="evening"><div><span class="lab">Твой вечер в КЬЮ</span><span class="name" id="ev">Тишина</span><span class="bonus" id="evb"></span></div><img class="eimg" id="eimg" src="quiet.webp" alt="" width="104" height="104"></div>
-  <form class="book" id="book" novalidate>
+  <div class="book" id="cta"><button class="btn" id="open" type="button">Забронировать место</button><button class="btn line again" type="button">Сыграть ещё раз</button></div>
+  <form class="book" id="book" novalidate hidden>
     <div class="field"><label class="lab" for="nm">Имя для брони</label><input id="nm" type="text" autocomplete="given-name" placeholder="Как записать"></div>
     <div class="field"><span class="lab" id="dl">Когда придёшь</span>
       <div class="days" role="radiogroup" aria-labelledby="dl">
@@ -184,8 +186,9 @@ button, input { font: inherit; color: inherit; }
       </div>
     </div>
     <p class="err" id="err" role="alert"></p>
-    <button class="btn" type="submit">Забронировать место</button>
+    <button class="btn" type="submit">Получить билет</button>
   </form>
+  <p class="ready" id="ready" hidden>Билет готов.</p>
   <div class="ticket" id="ticket" hidden>
     <div class="head"><img class="logo" src="logo-blue.svg" alt="КЬЮ listening bar" width="51" height="42"><span class="lab">Покровка 12</span></div>
     <div class="body">
@@ -199,7 +202,7 @@ button, input { font: inherit; color: inherit; }
     <p class="perk">Покажи экран бармену: первый коктейль «Игла» за счёт заведения. Это концепт: бронь никуда не уходит.</p>
   </div>
   <div class="book" id="saveWrap" hidden><button class="btn line" id="save" type="button">Сохранить билет</button></div>
-  <div class="book"><button class="link" id="again" type="button">Сыграть ещё раз</button></div>
+  <div class="book" id="againWrap" hidden><button class="link again" type="button">Сыграть ещё раз</button></div>
 </section>
 
 </main>
@@ -217,10 +220,10 @@ var NOISES = [
   { l: "Чат",               q: "Кто-то отвечает на рабочий чат вслух." }
 ];
 var LEVELS = [
-  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Игла скакала так, что бармен вышел сам.", ev: "Бетон", img: "poster-1.webp", bonus: "скидка 5%", perk: "Покажи экран бармену: скидка 5% на счёт. Это концепт: бронь и скидка условные." },
-  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Часть шума ты остановил. Остальное услышал весь бар.", ev: "Волна", img: "poster-2.webp", bonus: "скидка 10%", perk: "Покажи экран бармену: скидка 10% на счёт. Это концепт: бронь и скидка условные." },
-  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "Бар выдохнул. Можно слушать дальше.", ev: "Глубина", img: "poster-3.webp", bonus: "скидка 15%", perk: "Покажи экран бармену: скидка 15% на счёт. Это концепт: бронь и скидка условные." },
-  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "В зале тишина. Бармен перестал протирать бокалы.", ev: "Тишина", img: "quiet.webp", bonus: "коктейль «Игла» бесплатно", perk: "Покажи экран бармену: первый коктейль «Игла» за счёт заведения. Это концепт: бронь и бонус условные." }
+  { min: 0,  name: "Вас попросили на выход", lines: ["Вас попросили", "на выход"], line: "Шум оказался сильнее: игла скакала слишком часто. Попробуй ещё раз и глуши шум быстрее.", ev: "Бетон", img: "poster-1.webp", bonus: "скидка 5%", perk: "Покажи экран бармену: скидка 5% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 12, name: "Новичок", lines: ["Новичок"], line: "Ты только в начале пути. Чтобы устранить весь шум, тебе нужно больше тренироваться.", ev: "Волна", img: "poster-2.webp", bonus: "скидка 10%", perk: "Покажи экран бармену: скидка 10% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 25, name: "Частый гость", lines: ["Частый гость"], line: "У тебя неплохо получается: бар уже слушает музыку, а не шум. До полной тишины осталось немного.", ev: "Глубина", img: "poster-3.webp", bonus: "скидка 15%", perk: "Покажи экран бармену: скидка 15% на счёт. Это концепт: бронь и скидка условные." },
+  { min: 39, name: "Слышно, как падает игла", lines: ["Слышно, как", "падает игла"], line: "Ты справился с шумом. В баре такая тишина, что слышно, как игла касается пластинки.", ev: "Тишина", img: "quiet.webp", bonus: "коктейль «Игла» бесплатно", perk: "Покажи экран бармену: первый коктейль «Игла» за счёт заведения. Это концепт: бронь и бонус условные." }
 ];
 
 function $(s) { return document.querySelector(s); }
@@ -455,8 +458,8 @@ function startGame() {
   show("game"); sizeCanvas();
   el.chips.innerHTML = ""; chipEls = {}; el.cnt.textContent = "0"; el.fill.style.width = "0"; el.left.textContent = mmss(DUR);
   [].forEach.call(el.pips.children, function (p) { p.classList.remove("lost"); });
-  newGame(el.room.clientWidth, el.room.clientHeight); S.nextAt = 1.2; running = true; skipFx = 0;
-  say("Бармен протирает бокал. Ждёт, что кто-нибудь зашумит.");
+  newGame(el.room.clientWidth, el.room.clientHeight); S.nextAt = 2.4; running = true; skipFx = 0;
+  say("Бармен ждёт тишины. Тапай по шуму, пока кольцо не закрылось.");
   Snd.start();
 }
 function showResult() {
@@ -466,7 +469,7 @@ function showResult() {
   $("#rl").textContent = nb(L.line);
   $("#rs").textContent = S.shushed; $("#rk").textContent = S.skips; $("#rt2").textContent = Math.round(Math.min(S.t, DUR)) + "с";
   $("#ev").textContent = L.ev; $("#eimg").src = L.img; $("#evb").textContent = L.bonus; curLevel = L; $(".perk").textContent = nb(L.perk);
-  $("#book").hidden = false; $("#ticket").hidden = true; $("#saveWrap").hidden = true; $("#err").textContent = "";
+  $("#cta").hidden = false; $("#book").hidden = true; $("#ticket").hidden = true; $("#ready").hidden = true; $("#saveWrap").hidden = true; $("#againWrap").hidden = true; $("#err").textContent = "";
   show("result"); $("#result").scrollTop = 0; fitAll();
 }
 
@@ -559,7 +562,13 @@ function boot() {
     function go() { if (!done) { done = true; startGame(); } }
     if (p && p.then) { p.then(go, go); setTimeout(go, 400); } else go();
   }
-  $("#go").addEventListener("click", begin); $("#again").addEventListener("click", begin);
+  $("#go").addEventListener("click", begin);
+  [].forEach.call(document.querySelectorAll(".again"), function (b) { b.addEventListener("click", begin); });
+  $("#open").addEventListener("click", function () {
+    $("#cta").hidden = true; $("#book").hidden = false; $("#againWrap").hidden = false;
+    $("#book").scrollIntoView({ block: "start", behavior: "smooth" });
+    setTimeout(function () { try { $("#nm").focus({ preventScroll: true }); } catch (e) {} }, 350);
+  });
   $("#book").addEventListener("submit", function (e) {
     e.preventDefault();
     var nm = $("#nm").value.trim();
@@ -567,7 +576,8 @@ function boot() {
     var day = document.querySelector("input[name=day]:checked").value;
     $("#tn").textContent = nm; $("#te").textContent = "«" + $("#ev").textContent + "»"; $("#td").textContent = day; $("#tb").textContent = curLevel ? curLevel.bonus : "";
     $("#tc").textContent = "КЬЮ-" + ("000" + ((Math.random() * 9000 + 1000) | 0)).slice(-4);
-    $("#book").hidden = true; $("#ticket").hidden = false; $("#saveWrap").hidden = false; $("#ticket").scrollIntoView({ block: "nearest" });
+    $("#book").hidden = true; $("#ready").hidden = false; $("#ticket").hidden = false; $("#saveWrap").hidden = false; $("#againWrap").hidden = false;
+    $("#ready").scrollIntoView({ block: "start", behavior: "smooth" });
   });
   $("#save").addEventListener("click", saveTicket);
   Snd.preload();
